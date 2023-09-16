@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/steventohme/decentral-democracy#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.3",
     "solc": "^0.8.21",
     "truffle": "^5.11.5"
   }
