@@ -1,0 +1,27 @@
+{
+  "name": "decentral-democracy",
+  "version": "1.0.0",
+  "description": "Secure and transparent ethereum-based voting system",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steventohme/decentral-democracy.git"
+  },
+  "author": "Steven Tohme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/steventohme/decentral-democracy/issues"
+  },
+  "homepage": "https://github.com/steventohme/decentral-democracy#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "solc": "^0.8.21",
+    "truffle": "^5.11.5"
+  }
+}

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+
 contract VotingSystem {
     address[] public voters;
     mapping(address => bool) public isRegistered;
@@ -8,6 +10,9 @@ contract VotingSystem {
 
     event Voted(address indexed voter, uint indexed candidateId);
     event DebugLog(string message, address indexed voterAddress);
+
+    using ECDSA for bytes32;
+    mapping(address => bytes) public encryptedVotes;
 
     struct Candidate {
         uint id;
@@ -34,16 +39,15 @@ contract VotingSystem {
         emit DebugLog("Voter registered", voterAddress);
     }
 
-    function vote(uint candidateId) public {
-        require(isRegistered[msg.sender], "You are not registered to vote.");
-        require(!hasVoted[msg.sender], "You have already voted.");
-        require(candidateId < candidates.length, "Invalid candidate ID.");
+    function vote(bytes memory encryptedVote) public {
+        require(isRegistered[msg.sender], "Voter is not registered.");
+        require(!hasVoted[msg.sender], "Voter has already voted.");
+
+        bytes32 encryptionKey =  keccak256(abi.encodePacked(block.timestamp, msg.sender));
+        bytes memory encrypted = ECDSA.secp256k1Encrypt(encryptedVote, encryptionKey);
+
+        encryptedVotes[msg.sender] = encrypted;
 
         hasVoted[msg.sender] = true;
-
-        candidates[candidateId].voteCount++;
-
-        emit Voted(msg.sender, candidateId);
     }
-
 }
