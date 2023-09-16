@@ -27,4 +27,15 @@ contract VotingSystem {
         voters.push(voterAddress);
     }
 
+    function vote(uint candidateId) public {
+        require(!hasVoted[msg.sender], "You have already voted.");
+        require(candidateId < candidates.length, "Invalid candidate ID.");
+
+        hasVoted[msg.sender] = true;
+
+        candidates[candidateId].voteCount++;
+
+        emit Voted(msg.sender, candidateId);
+    }
+
 }
