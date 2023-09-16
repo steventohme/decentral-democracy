@@ -7,6 +7,7 @@ contract("VotingSystem", (accounts) => {
     const wallet = ethers.Wallet.createRandom();
     const privateKey = wallet.privateKey;
     const voterAddress = accounts[2];
+    const candidateId = 0; 
 
 
     before(async () => {
@@ -40,6 +41,7 @@ contract("VotingSystem", (accounts) => {
         // (For this basic example, we won't validate actual decryption logic)
         // assert(...) 
     });
+
     it("should allow a registered voter to cast a vote", async () => {
         // Register the voter
         await votingSystemInstance.registerVoter(voterAddress);
@@ -54,15 +56,13 @@ contract("VotingSystem", (accounts) => {
 
         // Encrypt the vote with the private key
         const wallet = new ethers.Wallet(privateKey);
-        const vote = "YourVoteHere"; // Replace with the actual vote content
-        const encryptedVote = await wallet.signMessage(vote);
+        const encryptedCandidateID = await wallet.signMessage(candidateId);
 
-        // Cast the vote
-        await votingSystemInstance.vote(encryptedVote, { from: voterAddress });
+        // Cast the vote for a specific candidate (adjust candidateId as needed)
+        await votingSystemInstance.vote(encryptedCandidateID, { from: voterAddress });
 
         // Check if the voter's vote has been recorded
         const hasVoted = await votingSystemInstance.hasVoted(voterAddress);
         assert.equal(hasVoted, true, "Voter's vote was not recorded.");
     });
-    
 });

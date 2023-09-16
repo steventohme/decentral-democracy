@@ -51,17 +51,24 @@ contract VotingSystem {
 
     // both of these function are encrypted with XOR for simplicity and demonstration purposes
     // production would have more robust encryption
-    function vote(uint candidateId, bytes memory encryptedVote) public {
+    function vote(bytes memory encryptedCandidateId) public {
         require(isRegistered[msg.sender], "Voter is not registered.");
         require(!hasVoted[msg.sender], "Voter has already voted.");
-        require(candidateId < candidates.length, "Invalid candidate ID.");
 
         bytes memory key = bytes("secret");
-        bytes memory encrypted = new bytes(encryptedVote.length);
-        for (uint i = 0; i < encryptedVote.length; i++) {
-            encrypted[i] = encryptedVote[i] ^ key[i % key.length];
+        bytes memory candidateIdBytes = new bytes(encryptedCandidateId.length);
+        for (uint i = 0; i < encryptedCandidateId.length; i++) {
+            candidateIdBytes[i] = encryptedCandidateId[i] ^ key[i % key.length];
         }
-        encryptedVotes[msg.sender] = encrypted;
+
+        // Convert the decrypted candidate ID bytes to a uint
+        uint candidateId = abi.decode(candidateIdBytes, (uint));
+
+        // Ensure that the candidate ID is valid
+        require(candidateId < candidates.length, "Invalid candidate ID.");
+
+        // Record the encrypted candidate ID as the vote
+        encryptedVotes[msg.sender] = encryptedCandidateId;
         hasVoted[msg.sender] = true;
 
         // Increment the vote count for the selected candidate
@@ -70,16 +77,29 @@ contract VotingSystem {
         emit Voted(msg.sender, candidateId);
     }
 
-    function countVotes(bytes memory privateKey) public view returns (bytes memory) {
+    function countVotes(bytes memory encryptedCandidateId) public view returns (uint[] memory) {
         require(isAuthorized(msg.sender), "Unauthorized user.");
-        bytes memory decrypted = new bytes(privateKey.length);
+        
+        // Decrypt the encrypted candidate ID to obtain the candidate ID
         bytes memory key = bytes("secret");
-
-        for (uint i = 0; i < privateKey.length; i++) {
-            decrypted[i] = privateKey[i] ^ key[i % key.length];
+        bytes memory candidateIdBytes = new bytes(encryptedCandidateId.length);
+        for (uint i = 0; i < encryptedCandidateId.length; i++) {
+            candidateIdBytes[i] = encryptedCandidateId[i] ^ key[i % key.length];
         }
 
-        return decrypted;
+        // Convert the decrypted candidate ID bytes to a uint
+        uint candidateId = abi.decode(candidateIdBytes, (uint));
+
+        // Ensure that the candidate ID is valid
+        require(candidateId < candidates.length, "Invalid candidate ID.");
+
+        // Create an array to store the vote counts for each candidate
+        uint[] memory voteCounts = new uint[](candidates.length);
+
+        // Retrieve and return the vote count for the specified candidate
+        voteCounts[candidateId] = candidates[candidateId].voteCount;
+
+        return voteCounts;
     }
 
 }
