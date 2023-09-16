@@ -7,7 +7,7 @@ contract VotingSystem {
     mapping(address => bool) public isRegistered;
     mapping(address => bool) public hasVoted;
     mapping(address => bytes) public encryptedVotes;
-
+    
     event Voted(address indexed voter, uint indexed candidateId);
     event DebugLog(string message, address indexed voterAddress);
     
@@ -37,8 +37,10 @@ contract VotingSystem {
         emit DebugLog("Voter registered", voterAddress);
     }
 
-    function isAuthorized(address caller) internal view returns (bool) {
-        address[] memory authorizedAddresses
+    function isAuthorized(address caller) public pure returns (bool) {
+        // for demonstration we assume we have a list of authorized personnel
+        address[] memory authorizedAddresses = new address[](1);
+        authorizedAddresses[0] = 0xeEfcDAD9Eadcd1E1cb9Ea466bbC635796940D073;
         for (uint i = 0; i < authorizedAddresses.length; i++) {
             if (authorizedAddresses[i] == caller) {
                 return true;
@@ -49,9 +51,10 @@ contract VotingSystem {
 
     // both of these function are encrypted with XOR for simplicity and demonstration purposes
     // production would have more robust encryption
-    function vote(bytes memory encryptedVote) public {
+    function vote(uint candidateId, bytes memory encryptedVote) public {
         require(isRegistered[msg.sender], "Voter is not registered.");
         require(!hasVoted[msg.sender], "Voter has already voted.");
+        require(candidateId < candidates.length, "Invalid candidate ID.");
 
         bytes memory key = bytes("secret");
         bytes memory encrypted = new bytes(encryptedVote.length);
@@ -60,6 +63,11 @@ contract VotingSystem {
         }
         encryptedVotes[msg.sender] = encrypted;
         hasVoted[msg.sender] = true;
+
+        // Increment the vote count for the selected candidate
+        candidates[candidateId].voteCount++;
+
+        emit Voted(msg.sender, candidateId);
     }
 
     function countVotes(bytes memory privateKey) public view returns (bytes memory) {
