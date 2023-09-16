@@ -37,6 +37,8 @@ contract VotingSystem {
         emit DebugLog("Voter registered", voterAddress);
     }
 
+    // both of these function are encrypted with XOR for simplicity and demonstration purposes
+    // production would have more robust encryption
     function vote(bytes memory encryptedVote) public {
         require(isRegistered[msg.sender], "Voter is not registered.");
         require(!hasVoted[msg.sender], "Voter has already voted.");
@@ -49,4 +51,17 @@ contract VotingSystem {
         encryptedVotes[msg.sender] = encrypted;
         hasVoted[msg.sender] = true;
     }
+
+    function countVotes(bytes memory privateKey) public view returns (bytes memory) {
+        require(/* authorized user */, "Unauthorized user.");
+        bytes memory decrypted = new bytes(privateKey.length);
+        bytes memory key = bytes("secret");
+
+        for (uint i = 0; i < privateKey.length; i++) {
+            decrypted[i] = privateKey[i] ^ key[i % key.length];
+        }
+
+        return decrypted;
+    }
+
 }
