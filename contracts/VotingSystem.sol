@@ -37,6 +37,16 @@ contract VotingSystem {
         emit DebugLog("Voter registered", voterAddress);
     }
 
+    function isAuthorized(address caller) internal view returns (bool) {
+        address[] memory authorizedAddresses
+        for (uint i = 0; i < authorizedAddresses.length; i++) {
+            if (authorizedAddresses[i] == caller) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // both of these function are encrypted with XOR for simplicity and demonstration purposes
     // production would have more robust encryption
     function vote(bytes memory encryptedVote) public {
@@ -53,7 +63,7 @@ contract VotingSystem {
     }
 
     function countVotes(bytes memory privateKey) public view returns (bytes memory) {
-        require(/* authorized user */, "Unauthorized user.");
+        require(isAuthorized(msg.sender), "Unauthorized user.");
         bytes memory decrypted = new bytes(privateKey.length);
         bytes memory key = bytes("secret");
 
