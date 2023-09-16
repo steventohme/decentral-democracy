@@ -5,6 +5,8 @@ contract VotingSystem {
     address[] public voters;
     mapping(address => bool) public hasVoted;
 
+    event Voted(address indexed voter, uint indexed candidateId);
+
     struct Candidate {
         uint id;
         string name;
