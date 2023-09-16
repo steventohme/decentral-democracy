@@ -57,7 +57,7 @@ contract("VotingSystem", (accounts) => {
         // Encrypt the vote with the private key
         const wallet = new ethers.Wallet(privateKey);
         const encryptedCandidateID = await wallet.signMessage(candidateId);
-
+        
         // Cast the vote for a specific candidate (adjust candidateId as needed)
         await votingSystemInstance.vote(encryptedCandidateID, { from: voterAddress });
 
