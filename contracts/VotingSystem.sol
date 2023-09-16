@@ -21,4 +21,10 @@ contract VotingSystem {
         }
     }
 
+    function registerVoter(address voterAddress) public {
+        // Only the contract owner or an authorized entity should be able to register voters
+        // TODO: add access control mechanism
+        voters.push(voterAddress);
+    }
+
 }
