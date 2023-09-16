@@ -3,9 +3,11 @@ pragma solidity ^0.8.0;
 
 contract VotingSystem {
     address[] public voters;
+    mapping(address => bool) public isRegistered;
     mapping(address => bool) public hasVoted;
 
     event Voted(address indexed voter, uint indexed candidateId);
+    event DebugLog(string message, address indexed voterAddress);
 
     struct Candidate {
         uint id;
@@ -26,10 +28,14 @@ contract VotingSystem {
     function registerVoter(address voterAddress) public {
         // Only the contract owner or an authorized entity should be able to register voters
         // TODO: add access control mechanism
+        emit DebugLog("Registering voter", voterAddress);
         voters.push(voterAddress);
+        isRegistered[voterAddress] = true;
+        emit DebugLog("Voter registered", voterAddress);
     }
 
     function vote(uint candidateId) public {
+        require(isRegistered[msg.sender], "You are not registered to vote.");
         require(!hasVoted[msg.sender], "You have already voted.");
         require(candidateId < candidates.length, "Invalid candidate ID.");
 
