@@ -1,6 +1,7 @@
-from web3 import Web3, HTTPProvider, contract
+from web3 import Web3, HTTPProvider
 import json
-# Connect to a local Ethereum node (replace with your node's URL)
+
+# Connect to a local Ethereum node
 w3 = Web3(HTTPProvider("http://127.0.0.1:7545"))
 
 # Replace with the path to your contract's JSON ABI file and contract address
@@ -13,8 +14,36 @@ with open(contract_abi_path) as f:
 # Create a contract instance
 voting_system_contract = w3.eth.contract(abi=contract_abi, address=contract_address)
 
+def sys():
+    print("""
+████████▄     ▄████████  ▄████████ ████████▄     ▄████████   ▄▄▄▄███▄▄▄▄   
+███   ▀███   ███    ███ ███    ███ ███   ▀███   ███    ███ ▄██▀▀▀███▀▀▀██▄ 
+███    ███   ███    █▀  ███    █▀  ███    ███   ███    █▀  ███   ███   ███ 
+███    ███  ▄███▄▄▄     ███        ███    ███  ▄███▄▄▄     ███   ███   ███ 
+███    ███ ▀▀███▀▀▀     ███        ███    ███ ▀▀███▀▀▀     ███   ███   ███ 
+███    ███   ███    █▄  ███    █▄  ███    ███   ███    █▄  ███   ███   ███ 
+███   ▄███   ███    ███ ███    ███ ███   ▄███   ███    ███ ███   ███   ███ 
+████████▀    ██████████ ████████▀  ████████▀    ██████████  ▀█   ███   █▀  
+                                                                           
+""")
+    print("Welcome to the Decentral Democracy")
+    option = input("To register as a voter, enter R. To vote, enter V. To exit, enter E.")
+    while option != "E":
+        if option == "R":
+            register()
+        elif option == "V":
+            vote()
+        else:
+            print("Invalid option. Please try again.")
+            option = input("To register as a voter, enter R. To vote, enter V. To exit, enter E.")
+    
+    print("Thank you for using Decentral Democracy. Have a nice day!")
+
+
+    
+
 # Main function
-def main():
+def test():
     accounts = w3.eth.accounts
     candidate_id = 1
     voter_address = accounts[2]
@@ -36,4 +65,5 @@ def main():
     print('Voter registered and vote cast successfully.')
 
 if __name__ == '__main__':
-    main()
+    Voting()
+
