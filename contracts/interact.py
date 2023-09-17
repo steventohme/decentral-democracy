@@ -1,4 +1,6 @@
 from web3 import Web3, HTTPProvider
+from eth_account import Account
+from eth_account.messages import encode_defunct
 import json
 import time
 
@@ -7,7 +9,7 @@ w3 = Web3(HTTPProvider("http://127.0.0.1:7545"))
 
 # Replace with the path to your contract's JSON ABI file and contract address
 contract_abi_path = '../build/contracts/VotingSystem.json'
-contract_address = '0x347caE419da15C7814dBE98326C594A86BeE05b6'
+contract_address = '0x9f50B64083a9477452b609b64F74c47776082c7b'
 
 with open(contract_abi_path) as f:
     contract_abi = json.load(f)["abi"]
@@ -46,7 +48,7 @@ def sys():
 def register():
     voterName = input("Enter your first name: ")
     voterSurname = input("Enter your last name: ")
-    voterDOB = input("Enter your date of birth: ")
+    voterDOB = input("Enter your date of birth (DD/MM/YY): ")
 
     registered_voters_count = voting_system_contract.functions.getRegisteredVotersCount().call()
     voter_address = w3.eth.accounts[registered_voters_count + 1]
@@ -64,35 +66,41 @@ def register():
             print("Waiting for transaction to be mined...")
             time.sleep(1) 
 
+    print(receipt)
     print("Your Ethereum address (public key) for voting is:", voter_address)
     return voter_address
 
+def vote():
+    voterAddress = input("Enter your Ethereum address (public key): ")
+    privateKey = input("Enter your private key: ")
+    candidateId = int(input("Enter the ID of the candidate you wish to vote for: "))
 
+    # Generate a signature using the private key
+    message_text = f"Vote for candidate {candidateId}"
+    message = encode_defunct(text=message_text)
+    signed_message = Account.sign_message(message, private_key=privateKey)
 
-    
+    # Send a transaction to the smart contract
+    transaction_hash = voting_system_contract.functions.vote(
+        voterAddress, candidateId, signed_message.signature.hex()
+    ).transact({'from': w3.eth.accounts[0], 'gas': 3000000})
 
-# Main function
-def test():
-    accounts = w3.eth.accounts
-    candidate_id = 1
-    voter_address = accounts[2]
+    while True:
+        try:
+            receipt = w3.eth.get_transaction(transaction_hash)
+            if receipt.blockNumber is not None:
+                break
+        except Exception as e:
+            print("Waiting for transaction to be mined...")
+            time.sleep(1)
 
-    # Register a voter
-    register_voter_receipt = voting_system_contract.functions.registerVoter(voter_address).transact({'from': accounts[0], 'gas': 3000000})
-    is_registered_status = voting_system_contract.functions.isRegistered(voter_address).call()
+    print("Vote cast successfully.")
 
-    print('Is Registered:', is_registered_status)
-
-    # Cast a vote
-    vote_receipt = voting_system_contract.functions.vote(candidate_id).transact({'from': voter_address})
-    has_voted_status = voting_system_contract.functions.hasVoted(voter_address).call()
-    print('Has Voted:', has_voted_status)
-
-
-    print('Register Voter Receipt Status:', has_voted_status)
-    print('Vote Receipt Status:', vote_receipt)
-    print('Voter registered and vote cast successfully.')
 
 if __name__ == '__main__':
-    sys()
+    register()
+    vote()
 
+# 0xb01ecBBf750E1C193F470632703cEdA68F932d90
+# 1
+# 0xb6fa6034793a3c299a5267fc902782af12d9988a4d91b1b6298fed4ae05fce8f
