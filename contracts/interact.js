@@ -12,11 +12,22 @@ async function main() {
   console.log('main')
   const accounts = await web3.eth.getAccounts();
   const candidateId = 1;
+  const voterAddress = accounts[2];
   // Register a voter
-  await votingSystemInstance.methods.registerVoter(voterAddress).send({ from: accounts[0], gas: 3000000 });
+  const registerVoterReceipt = await votingSystemInstance.methods.registerVoter(voterAddress).send({ from: accounts[0], gas: 3000000 });
+  const isRegisteredStatus = await votingSystemInstance.methods.isRegistered(voterAddress).call();
+  
+
+  console.log('Is Registered:', isRegisteredStatus);
+
 
   // Cast a vote
-  await votingSystemInstance.methods.vote(candidateId).send({ from: accounts[2] });
+  const voteReceipt = await votingSystemInstance.methods.vote(candidateId).send({ from: voterAddress });
+  const hasVotedStatus = await votingSystemInstance.methods.hasVoted(voterAddress).call();
+  console.log('Has Voted:', hasVotedStatus);
+
+  console.log('Register Voter Receipt Status:', registerVoterReceipt.status);
+  console.log('Vote Receipt Status:', voteReceipt.status);
 
   console.log('Voter registered and vote cast successfully.');
 }

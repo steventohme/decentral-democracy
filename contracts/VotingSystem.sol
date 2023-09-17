@@ -6,6 +6,7 @@ contract VotingSystem {
     address[] public voters;
     mapping(address => bool) public isRegistered;
     mapping(address => bool) public hasVoted;
+    address[] public addressVoted;
     
     event Voted(address indexed voter, uint indexed candidateId);
     event DebugLog(string message, address indexed voterAddress);
@@ -58,6 +59,7 @@ contract VotingSystem {
 
         // Record the vote
         hasVoted[msg.sender] = true;
+        addressVoted.push(msg.sender);
 
         // Increment the vote count for the selected candidate
         candidates[candidateId].voteCount++;
