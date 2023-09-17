@@ -4,15 +4,20 @@ pragma solidity ^0.8.0;
 
 contract VotingSystem {
 
-    mapping(address => bool) public isRegistered;
-    address[] public registeredVoters;
+    mapping(string => mapping(string => mapping(string => bool))) public isRegistered;
     mapping(address => bool) public hasVoted;
-    address[] public addressVoted;
+    address[] public registeredAddresses;
+    mapping(address => VoterInfo) public voterInfo;
     
     event Voted(address indexed voter, uint indexed candidateId);
-    event DebugLog(string message, address indexed voterAddress);
+    event VoterRegistered(address indexed voterAddress, string name, string surname, string dob);
     event DebugCandidateId(uint indexed candidateId);
     
+    struct VoterInfo {
+        string voterName;
+        string voterSurname;
+        string voterDOB;
+    }
 
     struct Candidate {
         uint id;
@@ -30,18 +35,19 @@ contract VotingSystem {
         }
     }
 
-    function registerVoter(address voterAddress) public {
-        // Only the contract owner or an authorized entity should be able to register voters
-        // TODO: add access control mechanism
-        emit DebugLog("Registering voter", voterAddress);
-        registeredVoters.push(voterAddress);
-        isRegistered[voterAddress] = true;
+    function registerVoter(string memory name, string memory surname, string memory dob) public {
+        require(!isRegistered[name][surname][dob], "Voter is already registered.");
+
+        address voterAddress = msg.sender;
+        isRegistered[name][surname][dob] = true;
+        registeredAddresses.push(voterAddress);
+        voterInfo[voterAddress] = VoterInfo(name, surname, dob);
         hasVoted[voterAddress] = false;
-        emit DebugLog("Voter registered", voterAddress);
+        emit VoterRegistered(voterAddress, name, surname, dob);
     }
 
     function getRegisteredVotersCount() public view returns (uint) {
-        return registeredVoters.length;
+        return registeredAddresses.length;
     }
 
     function isAuthorized(address caller) public pure returns (bool) {
@@ -57,17 +63,17 @@ contract VotingSystem {
     }
 
 
-    function vote(uint candidateId) public {
-        require(isRegistered[msg.sender], "Voter is not registered.");
-        require(!hasVoted[msg.sender], "Voter has already voted.");
-        require(candidateId < candidates.length, "Invalid candidate ID.");
+    // function vote(uint candidateId) public {
+    //     require(isRegistered[msg.sender], "Voter is not registered.");
+    //     require(!hasVoted[msg.sender], "Voter has already voted.");
+    //     require(candidateId < candidates.length, "Invalid candidate ID.");
 
-        hasVoted[msg.sender] = true;
-        addressVoted.push(msg.sender);
+    //     hasVoted[msg.sender] = true;
+    //     addressVoted.push(msg.sender);
 
-        candidates[candidateId].voteCount++;
-        emit Voted(msg.sender, candidateId);
-    }
+    //     candidates[candidateId].voteCount++;
+    //     emit Voted(msg.sender, candidateId);
+    // }
 
     function countVotes(uint candidateId) public view returns (uint) {
         require(isAuthorized(msg.sender), "Unauthorized user.");
