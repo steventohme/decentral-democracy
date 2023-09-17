@@ -57,11 +57,9 @@ contract VotingSystem {
         require(!hasVoted[msg.sender], "Voter has already voted.");
         require(candidateId < candidates.length, "Invalid candidate ID.");
 
-        // Record the vote
         hasVoted[msg.sender] = true;
         addressVoted.push(msg.sender);
 
-        // Increment the vote count for the selected candidate
         candidates[candidateId].voteCount++;
         emit Voted(msg.sender, candidateId);
     }
@@ -72,5 +70,4 @@ contract VotingSystem {
         
         return candidates[candidateId].voteCount;
     }
-
 }
