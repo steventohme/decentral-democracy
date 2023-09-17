@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 
 
 contract VotingSystem {
-    address[] public voters;
+
     mapping(address => bool) public isRegistered;
+    address[] public registeredVoters;
     mapping(address => bool) public hasVoted;
     address[] public addressVoted;
     
@@ -33,10 +34,14 @@ contract VotingSystem {
         // Only the contract owner or an authorized entity should be able to register voters
         // TODO: add access control mechanism
         emit DebugLog("Registering voter", voterAddress);
-        voters.push(voterAddress);
+        registeredVoters.push(voterAddress);
         isRegistered[voterAddress] = true;
         hasVoted[voterAddress] = false;
         emit DebugLog("Voter registered", voterAddress);
+    }
+
+    function getRegisteredVotersCount() public view returns (uint) {
+        return registeredVoters.length;
     }
 
     function isAuthorized(address caller) public pure returns (bool) {
