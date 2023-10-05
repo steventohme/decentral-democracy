@@ -9,7 +9,7 @@ w3 = Web3(HTTPProvider("http://127.0.0.1:7545"))
 
 # Replace with the path to your contract's JSON ABI file and contract address
 contract_abi_path = '../build/contracts/VotingSystem.json'
-contract_address = '0x9f50B64083a9477452b609b64F74c47776082c7b'
+contract_address = '0xF1473E2A9fac1C04Da08Cf1d9c6cb7473c21F71b'
 
 with open(contract_abi_path) as f:
     contract_abi = json.load(f)["abi"]
@@ -33,10 +33,10 @@ def sys():
     print("Welcome to the Decentral Democracy")
     option = input("To register as a voter, enter R. To vote, enter V. To exit, enter E. ")
     while option != "E":
-        if option == "R":
+        if option == "R" or option == "r":
             register()
             break
-        elif option == "V":
+        elif option == "V" or option == "v":
             vote()
             break
         else:
@@ -66,7 +66,6 @@ def register():
             print("Waiting for transaction to be mined...")
             time.sleep(1) 
 
-    print(receipt)
     print("Your Ethereum address (public key) for voting is:", voter_address)
     return voter_address
 
@@ -98,9 +97,8 @@ def vote():
 
 
 if __name__ == '__main__':
-    register()
-    vote()
+    sys()
 
-# 0xb01ecBBf750E1C193F470632703cEdA68F932d90
+# 0x9c77A8e832C0d6b58215Bb646E763C6641FFfd49
 # 1
-# 0xb6fa6034793a3c299a5267fc902782af12d9988a4d91b1b6298fed4ae05fce8f
+# 0x22f5e58eef95315bd7e0c0b0f84f1298d1df19b78c978452e3539c97bde41698

@@ -24,17 +24,17 @@ contract VotingSystem {
     Candidate[] public candidates;
 
     constructor(string[] memory candidateNames, string[] memory candidateAffiliations) {
-        require(candidateNames.length == candidateAffiliations.length, "Mismatch between names and affiliations.");
         for (uint i = 0; i < candidateNames.length; i++) {
             candidates.push(Candidate(i, candidateNames[i], candidateAffiliations[i], 0));
         }
     }
 
     function registerVoter(string memory name, string memory surname, string memory dob) public {
-        require(!isRegistered[name][surname][dob], "Voter is already registered.");
+        require(isRegistered[name][surname][dob] == false, "Voter with same details already registered");
 
         address voterAddress = msg.sender;
         isRegistered[name][surname][dob] = true;
+        isRegisteredAddress[voterAddress] = true;
         registeredAddresses.push(voterAddress);
         hasVoted[voterAddress] = false;
         emit VoterRegistered(voterAddress, name, surname, dob);
@@ -55,21 +55,6 @@ contract VotingSystem {
         }
         return false;
     }
-    //     function hexStringToBytes32(string memory hexString) private pure returns (bytes32) {
-    //     bytes32 result;
-    //     bytes memory hexBytes = bytes(hexString);
-
-    //     for (uint i = 0; i < hexBytes.length; i += 2) {
-    //         uint8 a = uint8(hexBytes[i]);
-    //         uint8 b = uint8(hexBytes[i + 1]);
-    //         require(a >= 48 && a <= 102 && b >= 48 && b <= 102, "Invalid hex string");
-    //         uint8 c = a > 57 ? a - 87 : a - 48;
-    //         uint8 d = b > 57 ? b - 87 : b - 48;
-    //         result |= bytes32(c * 16 + d) >> (i / 2 * 8);
-    //     }
-
-    //     return result;
-    // }
 
     function verifySignature(address signer, string memory signature) private pure returns (bool){
         bytes32 messageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", signer));
@@ -80,11 +65,33 @@ contract VotingSystem {
         return recoveredAddress == signer;
     }
 
+    function convertToAddress(string memory hexString) public pure returns (address) {
+        bytes memory hexBytes = bytes(hexString);
+        require(hexBytes.length == 42, "Invalid address length");
+        uint160 convertedAddress;
+        
+        for (uint i = 2; i < hexBytes.length; i++) {
+            uint8 digit = uint8(hexBytes[i]);
+            if (digit >= 48 && digit <= 57) {
+                digit -= 48;
+            } else if (digit >= 65 && digit <= 70) {
+                digit -= 55;
+            } else if (digit >= 97 && digit <= 102) {
+                digit -= 87;
+            } else {
+                revert("Invalid character in address");
+            }
+            convertedAddress = convertedAddress * 16 + uint160(digit);
+        }
+        
+        return address(convertedAddress);
+    }
+
 
     function vote(string memory voterAddressString, uint candidateId, string memory signature) public {
-        address voterAddress = address(bytes20(bytes(voterAddressString)));
-        require(isRegisteredAddress[voterAddress], "Voter is not registered.");
-        require(!hasVoted[voterAddress], "Voter has already voted.");
+        address voterAddress = convertToAddress(voterAddressString);
+        require(isRegisteredAddress[voterAddress] == true, "Voter is not registered.");
+        require(hasVoted[voterAddress] == false, "Voter has already voted.");
         require(candidateId < candidates.length, "Invalid candidate ID.");
 
         require(verifySignature(voterAddress, signature), "Signature verification failed.");
