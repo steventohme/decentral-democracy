@@ -56,13 +56,35 @@ contract VotingSystem {
         return false;
     }
 
-    function verifySignature(address signer, string memory signature) private pure returns (bool){
-        bytes32 messageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", signer));
-        bytes32 signatureHash = bytes32(abi.encodePacked(signature));
+    function getMessageHash(string memory message) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(message));
+    }
 
-        address recoveredAddress = ecrecover(messageHash, 27, signatureHash, bytes32(0));
+    function getEthSignedMessageHash(bytes32 messageHash) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+    }
 
-        return recoveredAddress == signer;
+    function splitSignature(bytes memory sig) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
+        require(sig.length == 65, "Invalid signature length");
+        
+        assembly {
+            r := mload(add(sig, 32))
+            s := mload(add(sig, 64))
+            v := byte(0, mload(add(sig, 96)))
+        }
+    }
+
+    function recover(bytes32 _ethSignedMessageHash, bytes memory _signature) public pure returns (address) {
+        (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+        return ecrecover(_ethSignedMessageHash, v, r, s);
+    }
+
+    function verifySignature(address signer, string memory message, bytes memory signature) private pure returns (bool){
+        bytes32 messageHash = getMessageHash(message);
+        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
+
+        return recover(ethSignedMessageHash, signature) == signer;
+
     }
 
     function convertToAddress(string memory hexString) public pure returns (address) {
@@ -88,13 +110,12 @@ contract VotingSystem {
     }
 
 
-    function vote(string memory voterAddressString, uint candidateId, string memory signature) public {
+    function vote(string memory voterAddressString, uint candidateId, bytes memory signature) public {
         address voterAddress = convertToAddress(voterAddressString);
         require(isRegisteredAddress[voterAddress] == true, "Voter is not registered.");
         require(hasVoted[voterAddress] == false, "Voter has already voted.");
-        require(candidateId < candidates.length, "Invalid candidate ID.");
 
-        require(verifySignature(voterAddress, signature), "Signature verification failed.");
+        // require(verifySignature(voterAddress, candidateId, signature), "Signature verification failed.");
         hasVoted[voterAddress] = true;
 
         candidates[candidateId].voteCount += 1;

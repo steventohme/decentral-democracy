@@ -9,7 +9,7 @@ w3 = Web3(HTTPProvider("http://127.0.0.1:7545"))
 
 # Replace with the path to your contract's JSON ABI file and contract address
 contract_abi_path = '../build/contracts/VotingSystem.json'
-contract_address = '0xF1473E2A9fac1C04Da08Cf1d9c6cb7473c21F71b'
+contract_address = '0xa051cd5cECc2A846ca80d0B9167dC1543bA084e0'
 
 with open(contract_abi_path) as f:
     contract_abi = json.load(f)["abi"]
@@ -99,6 +99,6 @@ def vote():
 if __name__ == '__main__':
     sys()
 
-# 0x9c77A8e832C0d6b58215Bb646E763C6641FFfd49
+# 0x8E4151ced6cEdE9ac2Ce0418DfdCB1b184B7Ba8a
 # 1
-# 0x22f5e58eef95315bd7e0c0b0f84f1298d1df19b78c978452e3539c97bde41698
+# 0xb20fd910bda73c869d4d3ae0b114a31812cce9db5aed01a954a005b0714640fd
